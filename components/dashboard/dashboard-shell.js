@@ -1,0 +1,222 @@
+"use client";
+
+import { useDeferredValue, useEffect, useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
+
+import {
+  BottomPanels,
+  ClientsSection,
+  HeroSection,
+  MetricGridSection,
+  SidePanels,
+} from "./dashboard-sections";
+
+const emptyDashboard = {
+  overview: {
+    coach: {
+      name: "",
+      title: "",
+      tagline: "",
+      responseTime: "",
+      nps: 0,
+      planPricing: {},
+    },
+    metrics: [],
+    spotlightClient: null,
+    agenda: [],
+    performanceBreakdown: [],
+  },
+  clients: [],
+  programs: [],
+  activity: [],
+};
+
+async function fetchJson(path, options = {}) {
+  const response = await fetch(path, {
+    credentials: "include",
+    headers: {
+      "Content-Type": "application/json",
+      ...(options.headers ?? {}),
+    },
+    ...options,
+  });
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({}));
+    throw new Error(error.error ?? `Request failed: ${response.status}`);
+  }
+
+  return response.json();
+}
+
+export function DashboardShell({ user }) {
+  const router = useRouter();
+  const [dashboard, setDashboard] = useState(emptyDashboard);
+  const [selectedClientId, setSelectedClientId] = useState(null);
+  const [search, setSearch] = useState("");
+  const [syncStatus, setSyncStatus] = useState("Initialisation du cockpit...");
+  const [isPending, startTransition] = useTransition();
+  const deferredSearch = useDeferredValue(search);
+
+  const filteredClients = dashboard.clients.filter((client) => {
+    if (!deferredSearch.trim()) {
+      return true;
+    }
+
+    const needle = deferredSearch.trim().toLowerCase();
+    return (
+      client.fullName.toLowerCase().includes(needle) ||
+      client.goal.toLowerCase().includes(needle) ||
+      client.city.toLowerCase().includes(needle)
+    );
+  });
+
+  const selectedClient =
+    dashboard.clients.find((client) => client.id === selectedClientId) ??
+    dashboard.clients[0] ??
+    null;
+
+  useEffect(() => {
+    void loadDashboard("Cockpit pret");
+  }, []);
+
+  useEffect(() => {
+    if (!selectedClientId && dashboard.clients.length) {
+      setSelectedClientId(dashboard.clients[0].id);
+    }
+  }, [dashboard.clients, selectedClientId]);
+
+  useEffect(() => {
+    const interval = window.setInterval(() => {
+      startTransition(() => {
+        void loadDashboard("Synchronisation automatique");
+      });
+    }, 12000);
+
+    return () => window.clearInterval(interval);
+  }, []);
+
+  async function loadDashboard(message) {
+    try {
+      const payload = await fetchJson("/api/dashboard");
+      setDashboard(payload);
+
+      if (!selectedClientId && payload.clients[0]?.id) {
+        setSelectedClientId(payload.clients[0].id);
+      }
+
+      if (selectedClientId && !payload.clients.some((client) => client.id === selectedClientId)) {
+        setSelectedClientId(payload.clients[0]?.id ?? null);
+      }
+
+      setSyncStatus(message);
+    } catch (error) {
+      setSyncStatus(error instanceof Error ? error.message : "Impossible de charger le dashboard.");
+    }
+  }
+
+  async function runMutation(requestFactory, pendingMessage, successMessage, onSuccess) {
+    try {
+      setSyncStatus(pendingMessage);
+      await requestFactory();
+      onSuccess?.();
+
+      startTransition(() => {
+        void loadDashboard(successMessage);
+      });
+    } catch (error) {
+      setSyncStatus(error instanceof Error ? error.message : "Une erreur est survenue");
+    }
+  }
+
+  const actions = {
+    selectClient: setSelectedClientId,
+    setSearch,
+    logout: async () => {
+      await fetchJson("/api/auth/logout", { method: "POST" });
+      router.replace("/login");
+      router.refresh();
+    },
+    createClient: async (payload, reset) =>
+      runMutation(
+        () => fetchJson("/api/clients", { method: "POST", body: JSON.stringify(payload) }),
+        "Creation du client...",
+        "Nouveau client ajoute",
+        reset,
+      ),
+    createProgram: async (payload, reset) =>
+      runMutation(
+        () => fetchJson("/api/programs", { method: "POST", body: JSON.stringify(payload) }),
+        "Creation du programme...",
+        "Programme cree",
+        reset,
+      ),
+    sendMessage: async (payload, reset) =>
+      runMutation(
+        () => fetchJson("/api/messages", { method: "POST", body: JSON.stringify(payload) }),
+        "Envoi du message...",
+        "Message envoye",
+        reset,
+      ),
+    createCheckIn: async (payload, reset) =>
+      runMutation(
+        () => fetchJson("/api/checkins", { method: "POST", body: JSON.stringify(payload) }),
+        "Enregistrement du check-in...",
+        "Check-in enregistre",
+        reset,
+      ),
+    saveClient: async (clientId, payload) =>
+      runMutation(
+        () => fetchJson(`/api/clients/${clientId}`, { method: "PATCH", body: JSON.stringify(payload) }),
+        "Sauvegarde de la fiche...",
+        "Fiche client sauvegardee",
+      ),
+    toggleTask: async (clientId, tasks) =>
+      runMutation(
+        () => fetchJson(`/api/clients/${clientId}`, { method: "PATCH", body: JSON.stringify({ tasks }) }),
+        "Mise a jour de la checklist...",
+        "Checklist mise a jour",
+      ),
+  };
+
+  return (
+    <main className="dashboard-page">
+      <HeroSection
+        coach={dashboard.overview.coach}
+        isPending={isPending}
+        onLogout={actions.logout}
+        spotlightClient={dashboard.overview.spotlightClient}
+        syncStatus={syncStatus}
+        user={user}
+        agenda={dashboard.overview.agenda}
+      />
+      <MetricGridSection metrics={dashboard.overview.metrics} />
+      <section className="main-grid">
+        <ClientsSection
+          clients={filteredClients}
+          comparison={dashboard.overview.performanceBreakdown}
+          onSaveClient={actions.saveClient}
+          onSearchChange={actions.setSearch}
+          onSelectClient={actions.selectClient}
+          onToggleTask={actions.toggleTask}
+          search={search}
+          selectedClient={selectedClient}
+        />
+        <SidePanels
+          activity={dashboard.activity}
+          clients={dashboard.clients}
+          onCreateProgram={actions.createProgram}
+          programs={dashboard.programs}
+          selectedClient={selectedClient}
+          syncStatus={syncStatus}
+        />
+      </section>
+      <BottomPanels
+        onCreateCheckIn={actions.createCheckIn}
+        onCreateClient={actions.createClient}
+        onSendMessage={actions.sendMessage}
+        selectedClient={selectedClient}
+      />
+    </main>
+  );
+}

@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>OMEGA FIT | Hors ligne</title>
+    <style>
+      :root {
+        color-scheme: dark;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        background: linear-gradient(180deg, #121212 0%, #0a0a0a 100%);
+        color: #f5f5f5;
+        font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+      }
+
+      .offline-card {
+        width: min(460px, calc(100% - 32px));
+        padding: 32px;
+        border-radius: 28px;
+        background: linear-gradient(180deg, rgba(30, 30, 30, 0.98), rgba(18, 18, 18, 0.96));
+        border: 1px solid rgba(229, 229, 229, 0.14);
+        box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+        text-align: center;
+      }
+
+      .mark {
+        width: 64px;
+        height: 64px;
+        margin: 0 auto 18px;
+        display: grid;
+        place-items: center;
+        border-radius: 50%;
+        border: 1px solid rgba(245, 245, 245, 0.24);
+        color: #f5f5f5;
+        font-family: Georgia, serif;
+        font-size: 1.8rem;
+      }
+
+      p {
+        color: #c0c0c0;
+        line-height: 1.6;
+      }
+    </style>
+  </head>
+  <body>
+    <section class="offline-card">
+      <div class="mark">Ω</div>
+      <h1>OMEGA FIT</h1>
+      <p>
+        La connexion est momentanement indisponible. Les ressources cachees restent accessibles,
+        et le dashboard se resynchronisera automatiquement des que le reseau reviendra.
+      </p>
+    </section>
+  </body>
+</html>
