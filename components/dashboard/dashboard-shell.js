@@ -104,6 +104,19 @@ export function DashboardShell({ user }) {
     jumpToSection(sectionId);
   }
 
+  function handleSelectClient(clientId) {
+    setSelectedClientId(clientId);
+
+    if (activeWorkspace === "clients" || activeWorkspace === "edition") {
+      window.requestAnimationFrame(() => {
+        document.getElementById("client-edit-panel")?.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
+      });
+    }
+  }
+
   useEffect(() => {
     void loadDashboard("Cockpit pret");
   }, []);
@@ -233,36 +246,72 @@ export function DashboardShell({ user }) {
 
       {activeWorkspace ? (
         <>
-          <MetricGridSection metrics={dashboard.overview.metrics} />
-          <section className="main-grid">
-            <ClientsSection
-              clients={filteredClients}
-              comparison={dashboard.overview.performanceBreakdown}
+          {activeWorkspace === "clients" ? (
+            <section className="single-workspace-grid">
+              <ClientsSection
+                clients={filteredClients}
+                comparison={dashboard.overview.performanceBreakdown}
+                latestCredentials={latestCredentials}
+                onDeleteClient={actions.deleteClient}
+                onSaveClient={actions.saveClient}
+                onSearchChange={actions.setSearch}
+                onSelectClient={handleSelectClient}
+                onToggleTask={actions.toggleTask}
+                search={search}
+                selectedClient={selectedClient}
+              />
+            </section>
+          ) : null}
+
+          {activeWorkspace === "edition" ? (
+            <>
+              <MetricGridSection metrics={dashboard.overview.metrics} />
+              <section className="single-workspace-grid">
+                <ClientsSection
+                  clients={filteredClients}
+                  comparison={dashboard.overview.performanceBreakdown}
+                  latestCredentials={latestCredentials}
+                  onDeleteClient={actions.deleteClient}
+                  onSaveClient={actions.saveClient}
+                  onSearchChange={actions.setSearch}
+                  onSelectClient={handleSelectClient}
+                  onToggleTask={actions.toggleTask}
+                  search={search}
+                  selectedClient={selectedClient}
+                />
+              </section>
+              <BottomPanels
+                onCreateCheckIn={actions.createCheckIn}
+                onCreateClient={actions.createClient}
+                onSendMessage={actions.sendMessage}
+                selectedClient={selectedClient}
+                latestCredentials={latestCredentials}
+              />
+            </>
+          ) : null}
+
+          {activeWorkspace === "messages" ? (
+            <BottomPanels
+              onCreateCheckIn={actions.createCheckIn}
+              onCreateClient={actions.createClient}
+              onSendMessage={actions.sendMessage}
+              selectedClient={selectedClient}
               latestCredentials={latestCredentials}
-              onDeleteClient={actions.deleteClient}
-              onSaveClient={actions.saveClient}
-              onSearchChange={actions.setSearch}
-              onSelectClient={actions.selectClient}
-              onToggleTask={actions.toggleTask}
-              search={search}
-              selectedClient={selectedClient}
             />
-            <SidePanels
-              activity={dashboard.activity}
-              clients={dashboard.clients}
-              onCreateProgram={actions.createProgram}
-              programs={dashboard.programs}
-              selectedClient={selectedClient}
-              syncStatus={syncStatus}
-            />
-          </section>
-          <BottomPanels
-            onCreateCheckIn={actions.createCheckIn}
-            onCreateClient={actions.createClient}
-            onSendMessage={actions.sendMessage}
-            selectedClient={selectedClient}
-            latestCredentials={latestCredentials}
-          />
+          ) : null}
+
+          {activeWorkspace === "programs" ? (
+            <section className="single-workspace-grid">
+              <SidePanels
+                activity={dashboard.activity}
+                clients={dashboard.clients}
+                onCreateProgram={actions.createProgram}
+                programs={dashboard.programs}
+                selectedClient={selectedClient}
+                syncStatus={syncStatus}
+              />
+            </section>
+          ) : null}
         </>
       ) : null}
 

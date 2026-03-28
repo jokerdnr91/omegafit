@@ -885,6 +885,7 @@ p {
 .coach-mini-stats,
 .mini-grid,
 .inline-grid,
+.single-workspace-grid,
 .client-layout,
 .main-grid,
 .bottom-grid {
@@ -932,6 +933,10 @@ p {
   grid-template-columns: minmax(0, 1.45fr) minmax(340px, 0.75fr);
 }
 
+.single-workspace-grid {
+  grid-template-columns: minmax(0, 1fr);
+}
+
 .bottom-grid {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
@@ -955,6 +960,7 @@ p {
 
 .client-layout {
   grid-template-columns: minmax(260px, 320px) minmax(0, 1fr);
+  align-items: start;
 }
 
 .client-card {
