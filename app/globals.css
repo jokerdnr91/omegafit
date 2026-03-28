@@ -963,6 +963,14 @@ p {
   align-items: start;
 }
 
+.client-layout.client-layout-detail-only {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.client-detail.client-detail-standalone {
+  max-width: 100%;
+}
+
 .client-card {
   cursor: pointer;
   text-align: left;

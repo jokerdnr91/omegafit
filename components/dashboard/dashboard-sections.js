@@ -204,12 +204,14 @@ export function ClientsSection({
   clients,
   comparison,
   latestCredentials,
+  onBackToList,
   onDeleteClient,
   onSaveClient,
   onSearchChange,
   onSelectClient,
   search,
   selectedClient,
+  showClientList = true,
 }) {
   async function handleSave(event) {
     event.preventDefault();
@@ -258,49 +260,51 @@ export function ClientsSection({
         />
       </div>
 
-      <div className="client-layout">
-        <div className="client-list">
-          {clients.map((client) => {
-            const activityState = getClientActivityState(client);
+      <div className={`client-layout ${showClientList ? "" : "client-layout-detail-only"}`}>
+        {showClientList ? (
+          <div className="client-list">
+            {clients.map((client) => {
+              const activityState = getClientActivityState(client);
 
-            return (
-              <button
-                className={`client-card ${selectedClient?.id === client.id ? "active" : ""}`}
-                key={client.id}
-                onClick={() => onSelectClient(client.id)}
-                type="button"
-              >
-                <div className="client-card-top">
-                  <span className="avatar">{client.initials}</span>
-                  <div>
-                    <strong>{client.fullName}</strong>
-                    <p>{client.goal}</p>
+              return (
+                <button
+                  className={`client-card ${selectedClient?.id === client.id ? "active" : ""}`}
+                  key={client.id}
+                  onClick={() => onSelectClient(client.id)}
+                  type="button"
+                >
+                  <div className="client-card-top">
+                    <span className="avatar">{client.initials}</span>
+                    <div>
+                      <strong>{client.fullName}</strong>
+                      <p>{client.goal}</p>
+                    </div>
                   </div>
-                </div>
-                <div className="coach-roster-meta">
-                  <span className={`status-pill status-${statusTone(activityState)}`}>{activityState}</span>
-                  {client.unreadMessages ? <span className="alert-badge">{client.unreadMessages} notif.</span> : null}
-                </div>
-                <div className="mini-grid">
-                  <div>
-                    <span>Adherence</span>
-                    <strong>{client.stats.adherence}%</strong>
+                  <div className="coach-roster-meta">
+                    <span className={`status-pill status-${statusTone(activityState)}`}>{activityState}</span>
+                    {client.unreadMessages ? <span className="alert-badge">{client.unreadMessages} notif.</span> : null}
                   </div>
-                  <div>
-                    <span>Recup</span>
-                    <strong>{client.stats.recovery}%</strong>
+                  <div className="mini-grid">
+                    <div>
+                      <span>Adherence</span>
+                      <strong>{client.stats.adherence}%</strong>
+                    </div>
+                    <div>
+                      <span>Recup</span>
+                      <strong>{client.stats.recovery}%</strong>
+                    </div>
+                    <div>
+                      <span>Statut</span>
+                      <strong>{client.status}</strong>
+                    </div>
                   </div>
-                  <div>
-                    <span>Statut</span>
-                    <strong>{client.status}</strong>
-                  </div>
-                </div>
-              </button>
-            );
-          })}
-        </div>
+                </button>
+              );
+            })}
+          </div>
+        ) : null}
 
-        <div className="client-detail">
+        <div className={`client-detail ${showClientList ? "" : "client-detail-standalone"}`}>
           {selectedClient ? (
             <div className="client-detail-stack">
               <section className="detail-card" id="client-edit-panel">
@@ -313,6 +317,11 @@ export function ClientsSection({
                     </p>
                   </div>
                   <div className="coach-roster-meta">
+                    {!showClientList ? (
+                      <button className="button button-ghost" onClick={onBackToList} type="button">
+                        Retour
+                      </button>
+                    ) : null}
                     <span className={`status-pill status-${statusTone(selectedClient.status)}`}>{selectedClient.status}</span>
                     <span className={`status-pill status-${statusTone(getClientActivityState(selectedClient))}`}>
                       {getClientActivityState(selectedClient)}

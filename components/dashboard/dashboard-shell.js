@@ -56,6 +56,7 @@ export function DashboardShell({ user }) {
   const [latestCredentials, setLatestCredentials] = useState(null);
   const [isCommandMenuOpen, setIsCommandMenuOpen] = useState(false);
   const [activeWorkspace, setActiveWorkspace] = useState(null);
+  const [isClientDetailOpen, setIsClientDetailOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [syncStatus, setSyncStatus] = useState("Initialisation du cockpit...");
   const [isPending, startTransition] = useTransition();
@@ -100,12 +101,16 @@ export function DashboardShell({ user }) {
   }
 
   function openWorkspace(workspace, sectionId) {
+    if (workspace === "clients") {
+      setIsClientDetailOpen(false);
+    }
     setActiveWorkspace(workspace);
     jumpToSection(sectionId);
   }
 
   function handleSelectClient(clientId) {
     setSelectedClientId(clientId);
+    setIsClientDetailOpen(true);
 
     if (activeWorkspace === "clients" || activeWorkspace === "edition") {
       window.requestAnimationFrame(() => {
@@ -115,6 +120,16 @@ export function DashboardShell({ user }) {
         });
       });
     }
+  }
+
+  function handleBackToClientList() {
+    setIsClientDetailOpen(false);
+    window.requestAnimationFrame(() => {
+      document.getElementById("clients-panel")?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    });
   }
 
   useEffect(() => {
@@ -247,11 +262,13 @@ export function DashboardShell({ user }) {
                 comparison={dashboard.overview.performanceBreakdown}
                 latestCredentials={latestCredentials}
                 onDeleteClient={actions.deleteClient}
+                onBackToList={handleBackToClientList}
                 onSaveClient={actions.saveClient}
                 onSearchChange={actions.setSearch}
                 onSelectClient={handleSelectClient}
                 search={search}
                 selectedClient={selectedClient}
+                showClientList={!isClientDetailOpen}
               />
             </section>
           ) : null}
@@ -265,11 +282,13 @@ export function DashboardShell({ user }) {
                   comparison={dashboard.overview.performanceBreakdown}
                   latestCredentials={latestCredentials}
                   onDeleteClient={actions.deleteClient}
+                  onBackToList={handleBackToClientList}
                   onSaveClient={actions.saveClient}
                   onSearchChange={actions.setSearch}
                   onSelectClient={handleSelectClient}
                   search={search}
                   selectedClient={selectedClient}
+                  showClientList
                 />
               </section>
               <BottomPanels
