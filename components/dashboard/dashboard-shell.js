@@ -54,6 +54,7 @@ export function DashboardShell({ user }) {
   const [dashboard, setDashboard] = useState(emptyDashboard);
   const [selectedClientId, setSelectedClientId] = useState(null);
   const [latestCredentials, setLatestCredentials] = useState(null);
+  const [isCommandMenuOpen, setIsCommandMenuOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [syncStatus, setSyncStatus] = useState("Initialisation du cockpit...");
   const [isPending, startTransition] = useTransition();
@@ -76,6 +77,19 @@ export function DashboardShell({ user }) {
     dashboard.clients.find((client) => client.id === selectedClientId) ??
     dashboard.clients[0] ??
     null;
+
+  function openCoachMenu() {
+    setIsCommandMenuOpen(true);
+  }
+
+  function closeCoachMenu() {
+    setIsCommandMenuOpen(false);
+  }
+
+  function jumpToSection(sectionId) {
+    document.getElementById(sectionId)?.scrollIntoView({ behavior: "smooth", block: "start" });
+    closeCoachMenu();
+  }
 
   useEffect(() => {
     void loadDashboard("Cockpit pret");
@@ -192,10 +206,11 @@ export function DashboardShell({ user }) {
   };
 
   return (
-    <main className="dashboard-page">
+    <main className="dashboard-page" id="dashboard-top">
       <HeroSection
         coach={dashboard.overview.coach}
         isPending={isPending}
+        onOpenCoachMenu={openCoachMenu}
         onLogout={actions.logout}
         spotlightClient={dashboard.overview.spotlightClient}
         syncStatus={syncStatus}
@@ -232,6 +247,54 @@ export function DashboardShell({ user }) {
         selectedClient={selectedClient}
         latestCredentials={latestCredentials}
       />
+
+      {isCommandMenuOpen ? (
+        <div className="coach-command-backdrop" onClick={closeCoachMenu} role="presentation">
+          <aside
+            aria-label="Navigation coach"
+            className="coach-command-menu glass-panel"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="panel-head">
+              <div>
+                <p className="section-kicker">Omega Menu</p>
+                <h2>Pilotage coach</h2>
+              </div>
+              <button className="button button-ghost" onClick={closeCoachMenu} type="button">
+                Fermer
+              </button>
+            </div>
+
+            <div className="coach-command-groups">
+              <button className="coach-command-item" onClick={() => jumpToSection("dashboard-top")} type="button">
+                <span>Maison</span>
+                <strong>Vue d'ensemble coach</strong>
+                <em>{dashboard.overview.metrics[0]?.value ?? dashboard.clients.length} clients suivis</em>
+              </button>
+              <button className="coach-command-item" onClick={() => jumpToSection("clients-panel")} type="button">
+                <span>Clients</span>
+                <strong>Roster et statut</strong>
+                <em>{dashboard.clients.length} clients dans le portefeuille</em>
+              </button>
+              <button className="coach-command-item" onClick={() => jumpToSection("client-edit-panel")} type="button">
+                <span>Edition</span>
+                <strong>Modifier, ajouter, retirer</strong>
+                <em>{selectedClient ? `Fiche active : ${selectedClient.fullName}` : "Selectionne un client"}</em>
+              </button>
+              <button className="coach-command-item" onClick={() => jumpToSection("messages-panel")} type="button">
+                <span>Messages</span>
+                <strong>Messagerie en direct</strong>
+                <em>{selectedClient?.unreadMessages ?? 0} message(s) non lus</em>
+              </button>
+              <button className="coach-command-item" onClick={() => jumpToSection("programs-panel")} type="button">
+                <span>Programmes</span>
+                <strong>Builder & duplication</strong>
+                <em>{dashboard.programs.length} programme(s) disponibles</em>
+              </button>
+            </div>
+          </aside>
+        </div>
+      ) : null}
     </main>
   );
 }

@@ -447,6 +447,53 @@ button {
   color: #f5dede;
 }
 
+.coach-command-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(10px);
+}
+
+.coach-command-menu {
+  position: fixed;
+  top: 24px;
+  left: 24px;
+  width: min(420px, calc(100vw - 32px));
+  display: grid;
+  gap: 1rem;
+  padding: 1.25rem;
+}
+
+.coach-command-groups {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.coach-command-item {
+  display: grid;
+  gap: 0.35rem;
+  text-align: left;
+  padding: 1rem 1.1rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  color: var(--text);
+  background: rgba(18, 18, 18, 0.82);
+  transition: transform 160ms ease, border-color 160ms ease, background 160ms ease;
+}
+
+.coach-command-item:hover {
+  transform: translateY(-1px);
+  border-color: var(--line-strong);
+  background: rgba(30, 30, 30, 0.92);
+}
+
+.coach-command-item span,
+.coach-command-item em {
+  color: var(--muted);
+  font-style: normal;
+}
+
 .auth-register-form {
   border-top: 1px solid var(--line);
   padding-top: 1rem;
@@ -605,6 +652,10 @@ p {
   height: 54px;
   font-family: "Georgia", "Times New Roman", serif;
   font-size: 1.65rem;
+}
+
+.brand-mark-button {
+  cursor: pointer;
 }
 
 .card-logo {

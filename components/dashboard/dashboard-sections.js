@@ -95,6 +95,7 @@ function createProgramExerciseRow() {
 export function HeroSection({
   coach,
   isPending,
+  onOpenCoachMenu,
   onLogout,
   spotlightClient,
   syncStatus,
@@ -105,9 +106,9 @@ export function HeroSection({
     <header className="dashboard-hero glass-panel">
       <div className="hero-copy">
         <div className="brand-lockup">
-          <span className="brand-mark" aria-hidden="true">
+          <button className="brand-mark brand-mark-button" onClick={onOpenCoachMenu} type="button">
             {"\u03A9"}
-          </span>
+          </button>
           <div>
             <p className="eyebrow">OMEGA FIT</p>
             <p className="brand-subtitle">Luxury Performance Platform</p>
@@ -304,7 +305,7 @@ export function ClientsSection({
         <div className="client-detail">
           {selectedClient ? (
             <div className="client-detail-stack">
-              <section className="detail-card">
+              <section className="detail-card" id="client-edit-panel">
                 <div className="card-head">
                   <div>
                     <p className="section-kicker">Profil</p>
@@ -647,7 +648,7 @@ export function SidePanels({ activity, clients, onCreateProgram, programs, selec
 
   return (
     <div className="side-stack">
-      <article className="glass-panel panel">
+      <article className="glass-panel panel" id="programs-panel">
         <div className="panel-head">
           <div><p className="section-kicker">Flux</p><h2>Notifications temps reel</h2></div>
           <span className="muted-text">{syncStatus}</span>
@@ -662,7 +663,7 @@ export function SidePanels({ activity, clients, onCreateProgram, programs, selec
         </div>
       </article>
 
-      <article className="glass-panel panel">
+      <article className="glass-panel panel" id="messages-panel">
         <div className="panel-head">
           <div><p className="section-kicker">Programmes</p><h2>Creation & duplication</h2></div>
         </div>
