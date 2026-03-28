@@ -53,6 +53,7 @@ export function DashboardShell({ user }) {
   const router = useRouter();
   const [dashboard, setDashboard] = useState(emptyDashboard);
   const [selectedClientId, setSelectedClientId] = useState(null);
+  const [latestCredentials, setLatestCredentials] = useState(null);
   const [search, setSearch] = useState("");
   const [syncStatus, setSyncStatus] = useState("Initialisation du cockpit...");
   const [isPending, startTransition] = useTransition();
@@ -139,10 +140,21 @@ export function DashboardShell({ user }) {
     },
     createClient: async (payload, reset) =>
       runMutation(
-        () => fetchJson("/api/clients", { method: "POST", body: JSON.stringify(payload) }),
+        async () => {
+          const result = await fetchJson("/api/clients", { method: "POST", body: JSON.stringify(payload) });
+          setLatestCredentials(result.credentials ?? null);
+          return result;
+        },
         "Creation du client...",
         "Nouveau client ajoute",
         reset,
+      ),
+    deleteClient: async (clientId) =>
+      runMutation(
+        () => fetchJson(`/api/clients/${clientId}`, { method: "DELETE" }),
+        "Suppression du client...",
+        "Client retire",
+        () => setSelectedClientId(null),
       ),
     createProgram: async (payload, reset) =>
       runMutation(
@@ -195,6 +207,8 @@ export function DashboardShell({ user }) {
         <ClientsSection
           clients={filteredClients}
           comparison={dashboard.overview.performanceBreakdown}
+          latestCredentials={latestCredentials}
+          onDeleteClient={actions.deleteClient}
           onSaveClient={actions.saveClient}
           onSearchChange={actions.setSearch}
           onSelectClient={actions.selectClient}
@@ -216,6 +230,7 @@ export function DashboardShell({ user }) {
         onCreateClient={actions.createClient}
         onSendMessage={actions.sendMessage}
         selectedClient={selectedClient}
+        latestCredentials={latestCredentials}
       />
     </main>
   );

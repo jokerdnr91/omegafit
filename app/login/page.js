@@ -32,7 +32,7 @@ export default async function LoginPage() {
           <span>Next.js</span>
           <span>PostgreSQL</span>
           <span>JWT Auth</span>
-          <span>WebSocket</span>
+          <span>PWA Sync</span>
         </div>
       </section>
 

@@ -29,11 +29,8 @@ export function PwaClientShell() {
   const [isLoginScreen, setIsLoginScreen] = useState(false);
 
   const shouldRender =
-    Boolean(deferredPrompt) ||
-    permission !== "granted" ||
-    !isStandalone ||
-    pushSubscribed ||
-    Boolean(feedback);
+    Boolean(feedback) ||
+    (!isStandalone && (Boolean(deferredPrompt) || permission !== "granted" || isIosSafari()));
 
   useEffect(() => {
     if (typeof window === "undefined") {
@@ -200,7 +197,7 @@ export function PwaClientShell() {
         </button>
       ) : null}
 
-      {!isLoginScreen && pushSubscribed ? (
+      {!isLoginScreen && pushSubscribed && !isStandalone ? (
         <div className="pwa-actions">
           <button className="button button-ghost" onClick={() => handlePushTest("reminder")} type="button">
             Tester rappel

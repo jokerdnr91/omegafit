@@ -202,6 +202,8 @@ export function MetricGridSection({ metrics }) {
 export function ClientsSection({
   clients,
   comparison,
+  latestCredentials,
+  onDeleteClient,
   onSaveClient,
   onSearchChange,
   onSelectClient,
@@ -217,6 +219,23 @@ export function ClientsSection({
 
     const formData = new FormData(event.currentTarget);
     await onSaveClient(selectedClient.id, {
+      fullName: String(formData.get("fullName") ?? selectedClient.fullName),
+      email: String(formData.get("email") ?? selectedClient.email),
+      phone: String(formData.get("phone") ?? selectedClient.phone),
+      city: String(formData.get("city") ?? selectedClient.city),
+      age: Number(formData.get("age") ?? selectedClient.age),
+      goal: String(formData.get("goal") ?? selectedClient.goal),
+      planTier: String(formData.get("planTier") ?? selectedClient.planTier),
+      nextSessionAt: String(formData.get("nextSessionAt") ?? selectedClient.nextSessionAt),
+      tags: String(formData.get("tags") ?? selectedClient.tags.join(", ")),
+      weightKg: Number(formData.get("weightKg") ?? selectedClient.stats.weightKg),
+      bodyFat: Number(formData.get("bodyFat") ?? selectedClient.stats.bodyFat),
+      sleepHours: Number(formData.get("sleepHours") ?? selectedClient.stats.sleepHours),
+      calories: Number(formData.get("calories") ?? selectedClient.nutrition.calories),
+      protein: Number(formData.get("protein") ?? selectedClient.nutrition.protein),
+      carbs: Number(formData.get("carbs") ?? selectedClient.nutrition.carbs),
+      fats: Number(formData.get("fats") ?? selectedClient.nutrition.fats),
+      loginPassword: String(formData.get("loginPassword") ?? ""),
       status: String(formData.get("status") ?? selectedClient.status),
       notes: String(formData.get("notes") ?? selectedClient.notes),
     });
@@ -314,6 +333,22 @@ export function ClientsSection({
                   <div><span>Sommeil</span><strong>{selectedClient.stats.sleepHours} h</strong></div>
                   <div><span>HRV</span><strong>{selectedClient.stats.hrv}</strong></div>
                 </div>
+                <div className="access-card">
+                  <div>
+                    <span>Connexion eleve</span>
+                    <strong>{selectedClient.email}</strong>
+                  </div>
+                  <p className="muted-text">Tu peux definir ou reinitialiser son mot de passe plus bas dans la fiche.</p>
+                </div>
+                {latestCredentials && latestCredentials.email === selectedClient.email ? (
+                  <div className="access-card accent">
+                    <div>
+                      <span>Acces genere</span>
+                      <strong>{latestCredentials.email}</strong>
+                    </div>
+                    <p className="muted-text">Mot de passe initial : <strong>{latestCredentials.password}</strong></p>
+                  </div>
+                ) : null}
               </section>
 
               <section className="detail-card">
@@ -423,8 +458,8 @@ export function ClientsSection({
               <section className="detail-card">
                 <div className="card-head">
                   <div>
-                    <p className="section-kicker">Execution</p>
-                    <h3>Checklist & notes</h3>
+                    <p className="section-kicker">Edition</p>
+                    <h3>Fiche client complete</h3>
                   </div>
                 </div>
                 <div className="task-list">
@@ -447,6 +482,76 @@ export function ClientsSection({
                   ))}
                 </div>
                 <form className="stack-form" onSubmit={handleSave}>
+                  <div className="inline-grid">
+                    <label>
+                      <span>Nom complet</span>
+                      <input defaultValue={selectedClient.fullName} name="fullName" required />
+                    </label>
+                    <label>
+                      <span>Email de connexion</span>
+                      <input defaultValue={selectedClient.email} name="email" type="email" required />
+                    </label>
+                  </div>
+                  <div className="inline-grid">
+                    <label>
+                      <span>Telephone</span>
+                      <input defaultValue={selectedClient.phone} name="phone" />
+                    </label>
+                    <label>
+                      <span>Ville</span>
+                      <input defaultValue={selectedClient.city} name="city" />
+                    </label>
+                  </div>
+                  <div className="inline-grid three">
+                    <label>
+                      <span>Age</span>
+                      <input defaultValue={selectedClient.age} name="age" type="number" />
+                    </label>
+                    <label>
+                      <span>Poids</span>
+                      <input defaultValue={selectedClient.stats.weightKg} name="weightKg" step="0.1" type="number" />
+                    </label>
+                    <label>
+                      <span>Body fat</span>
+                      <input defaultValue={selectedClient.stats.bodyFat} name="bodyFat" step="0.1" type="number" />
+                    </label>
+                  </div>
+                  <div className="inline-grid three">
+                    <label>
+                      <span>Sommeil</span>
+                      <input defaultValue={selectedClient.stats.sleepHours} name="sleepHours" step="0.1" type="number" />
+                    </label>
+                    <label>
+                      <span>Prochaine seance</span>
+                      <input defaultValue={selectedClient.nextSessionAt?.slice(0, 16) ?? ""} name="nextSessionAt" type="datetime-local" />
+                    </label>
+                    <label>
+                      <span>Offre</span>
+                      <select defaultValue={selectedClient.planTier} name="planTier">
+                        <option value="Elite">Elite</option>
+                        <option value="Premium">Premium</option>
+                        <option value="Essential">Essential</option>
+                      </select>
+                    </label>
+                  </div>
+                  <label>
+                    <span>Objectif</span>
+                    <input defaultValue={selectedClient.goal} name="goal" required />
+                  </label>
+                  <label>
+                    <span>Tags</span>
+                    <input defaultValue={selectedClient.tags.join(", ")} name="tags" placeholder="Hyrox, Strength, Nutrition" />
+                  </label>
+                  <div className="inline-grid four">
+                    <label><span>Calories</span><input defaultValue={selectedClient.nutrition.calories} name="calories" type="number" /></label>
+                    <label><span>Proteines</span><input defaultValue={selectedClient.nutrition.protein} name="protein" type="number" /></label>
+                    <label><span>Glucides</span><input defaultValue={selectedClient.nutrition.carbs} name="carbs" type="number" /></label>
+                    <label><span>Lipides</span><input defaultValue={selectedClient.nutrition.fats} name="fats" type="number" /></label>
+                  </div>
+                  <label>
+                    <span>Nouveau mot de passe eleve</span>
+                    <input name="loginPassword" placeholder="Laisser vide pour conserver l'actuel" type="text" />
+                  </label>
                   <label>
                     <span>Etat du suivi</span>
                     <select defaultValue={selectedClient.status} name="status">
@@ -461,7 +566,20 @@ export function ClientsSection({
                     <span>Notes coach</span>
                     <textarea defaultValue={selectedClient.notes} name="notes" rows={4} />
                   </label>
-                  <button className="button button-primary" type="submit">Sauvegarder la fiche</button>
+                  <div className="hero-actions compact-actions">
+                    <button className="button button-primary" type="submit">Sauvegarder la fiche</button>
+                    <button
+                      className="button button-ghost danger"
+                      onClick={() => {
+                        if (window.confirm(`Supprimer ${selectedClient.fullName} du roster ?`)) {
+                          void onDeleteClient(selectedClient.id);
+                        }
+                      }}
+                      type="button"
+                    >
+                      Retirer le client
+                    </button>
+                  </div>
                 </form>
               </section>
             </div>
@@ -640,7 +758,7 @@ export function SidePanels({ activity, clients, onCreateProgram, programs, selec
   );
 }
 
-export function BottomPanels({ onCreateCheckIn, onCreateClient, onSendMessage, selectedClient }) {
+export function BottomPanels({ latestCredentials, onCreateCheckIn, onCreateClient, onSendMessage, selectedClient }) {
   async function handleCreateClient(event) {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
@@ -713,8 +831,18 @@ export function BottomPanels({ onCreateCheckIn, onCreateClient, onSendMessage, s
             </div>
             <label><span>Objectif</span><input name="goal" placeholder="Transformation, Hyrox, prise de masse..." required /></label>
             <label><span>Offre</span><select defaultValue="Premium" name="planTier"><option value="Elite">Elite</option><option value="Premium">Premium</option><option value="Essential">Essential</option></select></label>
+            <label><span>Mot de passe eleve</span><input name="loginPassword" placeholder="Laisser vide pour generation auto" /></label>
             <label><span>Notes</span><textarea name="notes" placeholder="Contexte, niveau, contraintes..." rows={3} /></label>
             <button className="button button-primary" type="submit">Ajouter le client</button>
+            {latestCredentials ? (
+              <div className="access-card accent">
+                <div>
+                  <span>Dernier acces genere</span>
+                  <strong>{latestCredentials.email}</strong>
+                </div>
+                <p className="muted-text">Mot de passe : <strong>{latestCredentials.password}</strong></p>
+              </div>
+            ) : null}
           </form>
 
           <form className="stack-form" key={selectedClient?.id ?? "checkin-none"} onSubmit={handleCheckIn}>

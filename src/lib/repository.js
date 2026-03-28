@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 
 import { buildClientPayload, buildOverview } from "./analytics.js";
+import { hashPassword } from "./auth.js";
 import { coachPresentation } from "./seed.js";
 import { query, withTransaction } from "./db.js";
 
@@ -337,6 +338,10 @@ function buildEmailPlaceholder(fullName) {
   return `${slug || "client"}@omegafit.local`;
 }
 
+function buildGeneratedPassword(label = "OmegaFit") {
+  return `${label.replaceAll(/\s+/g, "").slice(0, 6) || "Omega"}${randomUUID().slice(0, 8)}!`;
+}
+
 async function appendActivity(db, coachId, clientId, type, title, detail) {
   await db.query(
     `
@@ -642,6 +647,7 @@ export async function createClientForCoach(coachId, payload) {
     const weightKg = Number(payload.weightKg ?? 78);
     const email = String(payload.email ?? "").trim() || buildEmailPlaceholder(payload.fullName);
     const phone = String(payload.phone ?? "").trim() || "Non renseigne";
+    const loginPassword = String(payload.loginPassword ?? "").trim() || buildGeneratedPassword("Client");
     const nextSessionAt = payload.nextSessionAt
       ? new Date(payload.nextSessionAt).toISOString()
       : new Date(Date.now() + 86400000).toISOString();
@@ -684,6 +690,14 @@ export async function createClientForCoach(coachId, payload) {
       ],
     );
 
+    await db.query(
+      `
+        insert into users (id, name, email, password_hash, role, client_id)
+        values ($1, $2, $3, $4, 'client', $5)
+      `,
+      [randomUUID(), payload.fullName.trim(), email, await hashPassword(loginPassword), clientId],
+    );
+
     const starterTasks = [
       { id: randomUUID(), label: "Programmer appel d'onboarding" },
       { id: randomUUID(), label: "Envoyer protocole de depart" },
@@ -723,7 +737,13 @@ export async function createClientForCoach(coachId, payload) {
       `${payload.fullName.trim()} rejoint le suivi ${payload.planTier ?? "Premium"}.`,
     );
 
-    return { id: clientId };
+    return {
+      id: clientId,
+      credentials: {
+        email,
+        password: loginPassword,
+      },
+    };
   });
 }
 
@@ -737,14 +757,94 @@ export async function updateClientForCoach(coachId, clientId, patch) {
 
     const nextStatus = typeof patch.status === "string" ? patch.status.trim() : client.status;
     const nextNotes = typeof patch.notes === "string" ? patch.notes.trim() : client.notes;
+    const nextFullName = typeof patch.fullName === "string" ? patch.fullName.trim() : client.full_name;
+    const nextEmail =
+      typeof patch.email === "string" && patch.email.trim() ? patch.email.trim().toLowerCase() : client.email;
+    const nextPhone = typeof patch.phone === "string" ? patch.phone.trim() : client.phone;
+    const nextCity = typeof patch.city === "string" ? patch.city.trim() : client.city;
+    const nextGoal = typeof patch.goal === "string" ? patch.goal.trim() : client.goal;
+    const nextPlanTier = typeof patch.planTier === "string" ? patch.planTier.trim() : client.plan_tier;
+    const nextAge = patch.age !== undefined ? Number(patch.age) : client.age;
+    const nextWeightKg = patch.weightKg !== undefined ? Number(patch.weightKg) : client.weight_kg;
+    const nextBodyFat = patch.bodyFat !== undefined ? Number(patch.bodyFat) : client.body_fat;
+    const nextSleepHours = patch.sleepHours !== undefined ? Number(patch.sleepHours) : client.sleep_hours;
+    const nextCalories = patch.calories !== undefined ? Number(patch.calories) : client.calories;
+    const nextProtein = patch.protein !== undefined ? Number(patch.protein) : client.protein;
+    const nextCarbs = patch.carbs !== undefined ? Number(patch.carbs) : client.carbs;
+    const nextFats = patch.fats !== undefined ? Number(patch.fats) : client.fats;
+    const nextTags = Array.isArray(patch.tags)
+      ? patch.tags.map((entry) => String(entry).trim()).filter(Boolean)
+      : typeof patch.tags === "string"
+        ? patch.tags.split(",").map((entry) => entry.trim()).filter(Boolean)
+        : client.tags;
+    const nextSessionAt =
+      typeof patch.nextSessionAt === "string" && patch.nextSessionAt
+        ? new Date(patch.nextSessionAt).toISOString()
+        : client.next_session_at;
 
     await db.query(
       `
         update clients
-        set status = $3, notes = $4, updated_at = now()
+        set
+          full_name = $3,
+          email = $4,
+          phone = $5,
+          city = $6,
+          age = $7,
+          goal = $8,
+          status = $9,
+          plan_tier = $10,
+          next_session_at = $11,
+          notes = $12,
+          tags = $13,
+          weight_kg = $14,
+          body_fat = $15,
+          sleep_hours = $16,
+          calories = $17,
+          protein = $18,
+          carbs = $19,
+          fats = $20,
+          updated_at = now()
         where id = $1 and coach_id = $2
       `,
-      [clientId, coachId, nextStatus, nextNotes],
+      [
+        clientId,
+        coachId,
+        nextFullName,
+        nextEmail,
+        nextPhone,
+        nextCity,
+        nextAge,
+        nextGoal,
+        nextStatus,
+        nextPlanTier,
+        nextSessionAt,
+        nextNotes,
+        nextTags,
+        nextWeightKg,
+        nextBodyFat,
+        nextSleepHours,
+        nextCalories,
+        nextProtein,
+        nextCarbs,
+        nextFats,
+      ],
+    );
+
+    await db.query(
+      `
+        update users
+        set name = $2, email = $3, password_hash = coalesce($4, password_hash)
+        where client_id = $1
+      `,
+      [
+        clientId,
+        nextFullName,
+        nextEmail,
+        typeof patch.loginPassword === "string" && patch.loginPassword.trim()
+          ? await hashPassword(patch.loginPassword.trim())
+          : null,
+      ],
     );
 
     if (Array.isArray(patch.tasks)) {
@@ -768,6 +868,59 @@ export async function updateClientForCoach(coachId, clientId, patch) {
     );
 
     return { id: clientId };
+  });
+}
+
+export async function deleteClientForCoach(coachId, clientId) {
+  return withTransaction(async (db) => {
+    const client = await getClientRow(db, coachId, clientId);
+
+    if (!client) {
+      throw new Error("Client not found.");
+    }
+
+    await db.query("delete from users where client_id = $1", [clientId]);
+    await db.query("delete from clients where id = $1 and coach_id = $2", [clientId, coachId]);
+
+    await appendActivity(
+      db,
+      coachId,
+      null,
+      "client",
+      "Client retire",
+      `${client.full_name} a ete retire du roster coach.`,
+    );
+
+    return { id: clientId };
+  });
+}
+
+export async function createCoachAccount(payload) {
+  return withTransaction(async (db) => {
+    const name = String(payload.name ?? "").trim();
+    const email = String(payload.email ?? "").trim().toLowerCase();
+    const password = String(payload.password ?? "").trim();
+
+    if (!name || !email || !password) {
+      throw new Error("name, email and password are required.");
+    }
+
+    const existing = await db.query("select id from users where email = $1 limit 1", [email]);
+
+    if (existing.rows[0]) {
+      throw new Error("A user already exists with this email.");
+    }
+
+    const id = randomUUID();
+    await db.query(
+      `
+        insert into users (id, name, email, password_hash, role)
+        values ($1, $2, $3, $4, 'coach')
+      `,
+      [id, name, email, await hashPassword(password)],
+    );
+
+    return { id, name, email, role: "coach" };
   });
 }
 
