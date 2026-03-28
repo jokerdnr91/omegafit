@@ -129,22 +129,6 @@ export function HeroSection({
           <span className="live-dot"></span>
           {isPending ? "Synchronisation..." : syncStatus}
         </div>
-        <div className="coach-summary">
-          <div>
-            <h2>{coach.name || user.name}</h2>
-            <p className="muted-text">{coach.title}</p>
-          </div>
-          <div className="coach-mini-stats">
-            <div>
-              <span>Reponse</span>
-              <strong>{coach.responseTime}</strong>
-            </div>
-            <div>
-              <span>NPS</span>
-              <strong>{coach.nps}</strong>
-            </div>
-          </div>
-        </div>
       </aside>
     </header>
   );
