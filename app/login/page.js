@@ -20,13 +20,12 @@ export default async function LoginPage() {
           </span>
           <div>
             <p className="eyebrow">OMEGA FIT</p>
-            <p className="brand-subtitle">Luxury Performance Platform</p>
+            <p className="brand-subtitle">Copilote coach sportif (coach)</p>
           </div>
         </div>
-        <h1>Le cockpit premium du coaching sportif moderne.</h1>
+        <h1>Copilote coach sportif.</h1>
         <p className="auth-copy">
-          Suivi clients, analytics en temps reel, messagerie coach et execution terrain
-          sur une seule plateforme Next.js.
+          Connexion coach et client sur une interface claire, fluide et orientee terrain.
         </p>
       </section>
 

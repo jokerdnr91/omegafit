@@ -44,22 +44,20 @@ export function LoginForm() {
       <label>
         <span>Email</span>
         <input
-          defaultValue="coach@omegafit.app"
           name="email"
           type="email"
           required
-          placeholder="coach@omegafit.app"
+          placeholder="Saisir une adresse email"
         />
       </label>
 
       <label>
         <span>Mot de passe</span>
         <input
-          defaultValue="OmegaFit2026!"
           name="password"
           type="password"
           required
-          placeholder="Votre mot de passe"
+          placeholder="Mot de passe"
         />
       </label>
 

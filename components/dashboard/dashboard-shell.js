@@ -355,8 +355,8 @@ export function DashboardShell({ user }) {
           >
             <div className="panel-head">
               <div>
-                <p className="section-kicker">Omega Menu</p>
-                <h2>Pilotage coach</h2>
+                <p className="section-kicker">OMEGA FIT</p>
+                <h2>Copilote coach sportif (coach)</h2>
               </div>
             </div>
 

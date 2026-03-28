@@ -109,11 +109,11 @@ export function HeroSection({
           </button>
           <div>
             <p className="eyebrow">OMEGA FIT</p>
-            <p className="brand-subtitle">Luxury Performance Platform</p>
+            <p className="brand-subtitle">Copilote coach sportif (coach)</p>
           </div>
         </div>
-        <h1>Le cockpit premium du coaching sportif.</h1>
-        <p className="hero-lead">{coach.tagline}</p>
+        <h1>Copilote coach sportif.</h1>
+        <p className="hero-lead">Gestion clients, edition et messagerie centralisees.</p>
         <div className="hero-actions">
           <button className="button button-primary" onClick={onOpenCoachMenu} type="button">
             Ouvrir le menu
@@ -826,15 +826,15 @@ export function CoachAccessPanel({ onCreateCoach }) {
       <form className="stack-form" onSubmit={handleCreateCoach}>
         <label>
           <span>Nom du coach</span>
-          <input name="name" placeholder="Dave R" required />
+          <input name="name" placeholder="Nom, prenom" required />
         </label>
         <label>
           <span>Email</span>
-          <input name="email" placeholder="coach@votrebrand.com" type="email" required />
+          <input name="email" placeholder="Saisir une adresse email" type="email" required />
         </label>
         <label>
           <span>Mot de passe</span>
-          <input name="password" placeholder="Choisir un mot de passe" type="password" required />
+          <input name="password" placeholder="Mot de passe" type="password" required />
         </label>
         {feedback.error ? <p className="form-error">{feedback.error}</p> : null}
         {feedback.success ? <p className="muted-text">{feedback.success}</p> : null}
