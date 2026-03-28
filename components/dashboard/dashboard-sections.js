@@ -736,10 +736,11 @@ export function BottomPanels({ latestCredentials, onCreateCheckIn, onCreateClien
   async function handleMessage(event) {
     event.preventDefault();
     if (!selectedClient) return;
-    const formData = new FormData(event.currentTarget);
+    const form = event.currentTarget;
+    const formData = new FormData(form);
     await onSendMessage(
       { clientId: selectedClient.id, content: String(formData.get("content") ?? "") },
-      () => event.currentTarget.reset(),
+      () => form.reset(),
     );
   }
 

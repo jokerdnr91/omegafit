@@ -356,9 +356,6 @@ export function DashboardShell({ user }) {
                 <p className="section-kicker">Omega Menu</p>
                 <h2>Pilotage coach</h2>
               </div>
-              <button className="button button-ghost" onClick={closeCoachMenu} type="button">
-                Fermer
-              </button>
             </div>
 
             <div className="coach-command-groups">
@@ -388,11 +385,6 @@ export function DashboardShell({ user }) {
                 <span>Messages</span>
                 <strong>Messagerie en direct</strong>
                 <em>{selectedClient?.unreadMessages ?? 0} message(s) non lus</em>
-              </button>
-              <button className="coach-command-item" onClick={() => openWorkspace("programs", "programs-panel")} type="button">
-                <span>Programmes</span>
-                <strong>Builder & duplication</strong>
-                <em>{dashboard.programs.length} programme(s) disponibles</em>
               </button>
               <button className="coach-command-item" onClick={() => openWorkspace("coaches", "coach-create-panel")} type="button">
                 <span>Coachs</span>
