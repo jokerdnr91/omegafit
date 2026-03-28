@@ -975,6 +975,10 @@ p {
   max-width: 100%;
 }
 
+.client-detail-stack.client-detail-stack-edition > .detail-card:not(.client-edit-card) {
+  display: none;
+}
+
 .client-card {
   cursor: pointer;
   text-align: left;

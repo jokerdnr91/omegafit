@@ -8,7 +8,6 @@ import {
   CoachAccessPanel,
   ClientsSection,
   HeroSection,
-  MetricGridSection,
   SidePanels,
 } from "./dashboard-sections";
 
@@ -287,11 +286,11 @@ export function DashboardShell({ user }) {
 
           {activeWorkspace === "edition" ? (
             <>
-              <MetricGridSection metrics={dashboard.overview.metrics} />
               <section className="single-workspace-grid">
                 <ClientsSection
                   clients={filteredClients}
                   comparison={dashboard.overview.performanceBreakdown}
+                  editionOnly
                   latestCredentials={latestCredentials}
                   onDeleteClient={actions.deleteClient}
                   onBackToList={handleBackToClientList}
@@ -304,11 +303,13 @@ export function DashboardShell({ user }) {
                 />
               </section>
               <BottomPanels
-                onCreateCheckIn={actions.createCheckIn}
                 onCreateClient={actions.createClient}
+                latestCredentials={latestCredentials}
+                onCreateCheckIn={actions.createCheckIn}
                 onSendMessage={actions.sendMessage}
                 selectedClient={selectedClient}
-                latestCredentials={latestCredentials}
+                showCheckInPanel={false}
+                showMessagePanel={false}
               />
             </>
           ) : null}

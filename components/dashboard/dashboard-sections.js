@@ -151,6 +151,7 @@ export function MetricGridSection({ metrics }) {
 export function ClientsSection({
   clients,
   comparison,
+  editionOnly = false,
   latestCredentials,
   onBackToList,
   onDeleteClient,
@@ -249,8 +250,8 @@ export function ClientsSection({
 
         <div className={`client-detail ${showClientList ? "" : "client-detail-standalone"}`}>
           {selectedClient ? (
-            <div className="client-detail-stack">
-              <section className="detail-card" id="client-edit-panel">
+            <div className={`client-detail-stack ${editionOnly ? "client-detail-stack-edition" : ""}`}>
+              <section className="detail-card" id={editionOnly ? "client-profile-panel" : "client-edit-panel"}>
                 <div className="card-head">
                   <div>
                     <p className="section-kicker">Profil</p>
@@ -294,7 +295,7 @@ export function ClientsSection({
                 ) : null}
               </section>
 
-              <section className="detail-card">
+              <section className="detail-card client-edit-card" id={editionOnly ? "client-edit-panel" : undefined}>
                 <div className="card-head">
                   <div>
                     <p className="section-kicker">Progression</p>
@@ -668,6 +669,9 @@ export function BottomPanels({
   onCreateClient,
   onSendMessage,
   selectedClient,
+  showCheckInPanel = true,
+  showClientCreatePanel = true,
+  showMessagePanel = true,
   showActionsPanel = true,
 }) {
   async function handleCreateClient(event) {
@@ -709,69 +713,80 @@ export function BottomPanels({
 
   return (
     <section className={`bottom-grid ${showActionsPanel ? "" : "bottom-grid-single"}`}>
-      <article className="glass-panel panel">
-        <div className="panel-head"><div><p className="section-kicker">Communication</p><h2>Messagerie coach</h2></div></div>
-        <div className="message-list">
-          {selectedClient?.messages?.length ? selectedClient.messages.map((message) => (
-            <article className={`message-card ${message.senderRole}`} key={message.id}>
-              <div className="card-head"><strong>{message.senderRole === "coach" ? "Coach" : selectedClient.fullName}</strong><span>{formatDate(message.createdAt)}</span></div>
-              {message.content ? <p>{message.content}</p> : null}
-              {message.mediaUrl && message.mediaType === "image" ? <img alt="Media conversation" className="message-media" src={message.mediaUrl} /> : null}
-              {message.mediaUrl && message.mediaType === "video" ? <video className="message-media" controls src={message.mediaUrl} /> : null}
-            </article>
-          )) : <div className="empty-card">Selectionne un client pour voir le fil de messages.</div>}
-        </div>
-        <form className="stack-form" onSubmit={handleMessage}>
-          <label><span>Message</span><textarea name="content" placeholder="Ton feedback coaching..." required rows={4} /></label>
-          <button className="button button-primary" disabled={!selectedClient} type="submit">Envoyer</button>
-        </form>
-      </article>
-
-      {showActionsPanel ? (
+      {showMessagePanel ? (
         <article className="glass-panel panel">
-          <div className="panel-head"><div><p className="section-kicker">Actions rapides</p><h2>Onboarding & check-ins</h2></div></div>
-          <div className="forms-stack">
-            <form className="stack-form" onSubmit={handleCreateClient}>
-              <h3>Nouveau client</h3>
-              <label><span>Nom complet</span><input name="fullName" placeholder="Nom du client" required /></label>
-              <div className="inline-grid">
-                <label><span>Email</span><input name="email" placeholder="client@example.com" type="email" /></label>
-                <label><span>Telephone</span><input name="phone" placeholder="+33 6..." /></label>
-              </div>
-              <div className="inline-grid">
-                <label><span>Ville</span><input name="city" placeholder="Paris" required /></label>
-                <label><span>Age</span><input defaultValue="30" max="80" min="16" name="age" type="number" /></label>
-              </div>
-              <label><span>Objectif</span><input name="goal" placeholder="Transformation, Hyrox, prise de masse..." required /></label>
-              <label><span>Offre</span><select defaultValue="Premium" name="planTier"><option value="Elite">Elite</option><option value="Premium">Premium</option><option value="Essential">Essential</option></select></label>
-              <label><span>Mot de passe eleve</span><input name="loginPassword" placeholder="Laisser vide pour generation auto" /></label>
-              <label><span>Notes</span><textarea name="notes" placeholder="Contexte, niveau, contraintes..." rows={3} /></label>
-              <button className="button button-primary" type="submit">Ajouter le client</button>
-              {latestCredentials ? (
-                <div className="access-card accent">
-                  <div>
-                    <span>Dernier acces genere</span>
-                    <strong>{latestCredentials.email}</strong>
-                  </div>
-                  <p className="muted-text">Mot de passe : <strong>{latestCredentials.password}</strong></p>
-                </div>
-              ) : null}
-            </form>
+          <div className="panel-head"><div><p className="section-kicker">Communication</p><h2>Messagerie coach</h2></div></div>
+          <div className="message-list">
+            {selectedClient?.messages?.length ? selectedClient.messages.map((message) => (
+              <article className={`message-card ${message.senderRole}`} key={message.id}>
+                <div className="card-head"><strong>{message.senderRole === "coach" ? "Coach" : selectedClient.fullName}</strong><span>{formatDate(message.createdAt)}</span></div>
+                {message.content ? <p>{message.content}</p> : null}
+                {message.mediaUrl && message.mediaType === "image" ? <img alt="Media conversation" className="message-media" src={message.mediaUrl} /> : null}
+                {message.mediaUrl && message.mediaType === "video" ? <video className="message-media" controls src={message.mediaUrl} /> : null}
+              </article>
+            )) : <div className="empty-card">Selectionne un client pour voir le fil de messages.</div>}
+          </div>
+          <form className="stack-form" onSubmit={handleMessage}>
+            <label><span>Message</span><textarea name="content" placeholder="Ton feedback coaching..." required rows={4} /></label>
+            <button className="button button-primary" disabled={!selectedClient} type="submit">Envoyer</button>
+          </form>
+        </article>
+      ) : null}
 
-            <form className="stack-form" key={selectedClient?.id ?? "checkin-none"} onSubmit={handleCheckIn}>
-              <h3>Nouveau check-in</h3>
-              <label><span>Completion du plan (%)</span><input defaultValue={selectedClient?.latestCheckIn?.workoutCompletion ?? 90} max="100" min="0" name="workoutCompletion" type="number" /></label>
-              <div className="inline-grid">
-                <label><span>Energie /10</span><input defaultValue={selectedClient?.latestCheckIn?.energy ?? 8} max="10" min="1" name="energy" type="number" /></label>
-                <label><span>Motivation /10</span><input defaultValue={selectedClient?.latestCheckIn?.motivation ?? 8} max="10" min="1" name="motivation" type="number" /></label>
-              </div>
-              <div className="inline-grid">
-                <label><span>Courbatures /10</span><input defaultValue={selectedClient?.latestCheckIn?.soreness ?? 4} max="10" min="1" name="soreness" type="number" /></label>
-                <label><span>Poids (kg)</span><input defaultValue={selectedClient?.stats.weightKg ?? 72} min="35" name="weightKg" step="0.1" type="number" /></label>
-              </div>
-              <label><span>Note coach</span><textarea name="note" placeholder="Ressenti, ajustements, points d'attention..." rows={3} /></label>
-              <button className="button button-primary" disabled={!selectedClient} type="submit">Enregistrer le check-in</button>
-            </form>
+      {showActionsPanel && (showClientCreatePanel || showCheckInPanel) ? (
+        <article className="glass-panel panel">
+          <div className="panel-head">
+            <div>
+              <p className="section-kicker">{showCheckInPanel ? "Actions rapides" : "Edition"}</p>
+              <h2>{showCheckInPanel ? "Onboarding & check-ins" : "Ajouter un client"}</h2>
+            </div>
+          </div>
+          <div className="forms-stack">
+            {showClientCreatePanel ? (
+              <form className="stack-form" onSubmit={handleCreateClient}>
+                <h3>Nouveau client</h3>
+                <label><span>Nom complet</span><input name="fullName" placeholder="Nom du client" required /></label>
+                <div className="inline-grid">
+                  <label><span>Email</span><input name="email" placeholder="client@example.com" type="email" /></label>
+                  <label><span>Telephone</span><input name="phone" placeholder="+33 6..." /></label>
+                </div>
+                <div className="inline-grid">
+                  <label><span>Ville</span><input name="city" placeholder="Paris" required /></label>
+                  <label><span>Age</span><input defaultValue="30" max="80" min="16" name="age" type="number" /></label>
+                </div>
+                <label><span>Objectif</span><input name="goal" placeholder="Transformation, Hyrox, prise de masse..." required /></label>
+                <label><span>Offre</span><select defaultValue="Premium" name="planTier"><option value="Elite">Elite</option><option value="Premium">Premium</option><option value="Essential">Essential</option></select></label>
+                <label><span>Mot de passe eleve</span><input name="loginPassword" placeholder="Laisser vide pour generation auto" /></label>
+                <label><span>Notes</span><textarea name="notes" placeholder="Contexte, niveau, contraintes..." rows={3} /></label>
+                <button className="button button-primary" type="submit">Ajouter le client</button>
+                {latestCredentials ? (
+                  <div className="access-card accent">
+                    <div>
+                      <span>Dernier acces genere</span>
+                      <strong>{latestCredentials.email}</strong>
+                    </div>
+                    <p className="muted-text">Mot de passe : <strong>{latestCredentials.password}</strong></p>
+                  </div>
+                ) : null}
+              </form>
+            ) : null}
+
+            {showCheckInPanel ? (
+              <form className="stack-form" key={selectedClient?.id ?? "checkin-none"} onSubmit={handleCheckIn}>
+                <h3>Nouveau check-in</h3>
+                <label><span>Completion du plan (%)</span><input defaultValue={selectedClient?.latestCheckIn?.workoutCompletion ?? 90} max="100" min="0" name="workoutCompletion" type="number" /></label>
+                <div className="inline-grid">
+                  <label><span>Energie /10</span><input defaultValue={selectedClient?.latestCheckIn?.energy ?? 8} max="10" min="1" name="energy" type="number" /></label>
+                  <label><span>Motivation /10</span><input defaultValue={selectedClient?.latestCheckIn?.motivation ?? 8} max="10" min="1" name="motivation" type="number" /></label>
+                </div>
+                <div className="inline-grid">
+                  <label><span>Courbatures /10</span><input defaultValue={selectedClient?.latestCheckIn?.soreness ?? 4} max="10" min="1" name="soreness" type="number" /></label>
+                  <label><span>Poids (kg)</span><input defaultValue={selectedClient?.stats.weightKg ?? 72} min="35" name="weightKg" step="0.1" type="number" /></label>
+                </div>
+                <label><span>Note coach</span><textarea name="note" placeholder="Ressenti, ajustements, points d'attention..." rows={3} /></label>
+                <button className="button button-primary" disabled={!selectedClient} type="submit">Enregistrer le check-in</button>
+              </form>
+            ) : null}
           </div>
         </article>
       ) : null}
