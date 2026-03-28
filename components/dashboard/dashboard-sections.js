@@ -813,6 +813,58 @@ export function BottomPanels({ latestCredentials, onCreateCheckIn, onCreateClien
   );
 }
 
+export function CoachAccessPanel({ onCreateCoach }) {
+  const [feedback, setFeedback] = useState({ error: "", success: "" });
+
+  async function handleCreateCoach(event) {
+    event.preventDefault();
+    setFeedback({ error: "", success: "" });
+
+    try {
+      const formData = new FormData(event.currentTarget);
+      const payload = Object.fromEntries(formData.entries());
+      await onCreateCoach(payload, () => event.currentTarget.reset());
+      setFeedback({ error: "", success: "Coach cree avec succes." });
+    } catch (error) {
+      setFeedback({
+        error: error instanceof Error ? error.message : "Creation du coach impossible.",
+        success: "",
+      });
+    }
+  }
+
+  return (
+    <article className="glass-panel panel" id="coach-create-panel">
+      <div className="panel-head">
+        <div>
+          <p className="section-kicker">Coach</p>
+          <h2>Creer un coach</h2>
+        </div>
+      </div>
+
+      <form className="stack-form" onSubmit={handleCreateCoach}>
+        <label>
+          <span>Nom du coach</span>
+          <input name="name" placeholder="Dave R" required />
+        </label>
+        <label>
+          <span>Email</span>
+          <input name="email" placeholder="coach@votrebrand.com" type="email" required />
+        </label>
+        <label>
+          <span>Mot de passe</span>
+          <input name="password" placeholder="Choisir un mot de passe" type="password" required />
+        </label>
+        {feedback.error ? <p className="form-error">{feedback.error}</p> : null}
+        {feedback.success ? <p className="muted-text">{feedback.success}</p> : null}
+        <button className="button button-primary" type="submit">
+          Ajouter le coach
+        </button>
+      </form>
+    </article>
+  );
+}
+
 function TrendChart({ points, valueKey }) {
   if (!points?.length) {
     return <div className="empty-card">Aucune donnee de progression.</div>;

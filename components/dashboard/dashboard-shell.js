@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 
 import {
   BottomPanels,
+  CoachAccessPanel,
   ClientsSection,
   HeroSection,
   MetricGridSection,
@@ -218,6 +219,19 @@ export function DashboardShell({ user }) {
         "Programme cree",
         reset,
       ),
+    createCoach: async (payload, reset) => {
+      try {
+        setSyncStatus("Creation du coach...");
+        await fetchJson("/api/coaches", { method: "POST", body: JSON.stringify(payload) });
+        reset?.();
+        startTransition(() => {
+          void loadDashboard("Coach ajoute");
+        });
+      } catch (error) {
+        setSyncStatus(error instanceof Error ? error.message : "Creation du coach impossible.");
+        throw error;
+      }
+    },
     sendMessage: async (payload, reset) =>
       runMutation(
         () => fetchJson("/api/messages", { method: "POST", body: JSON.stringify(payload) }),
@@ -321,6 +335,12 @@ export function DashboardShell({ user }) {
               />
             </section>
           ) : null}
+
+          {activeWorkspace === "coaches" ? (
+            <section className="single-workspace-grid">
+              <CoachAccessPanel onCreateCoach={actions.createCoach} />
+            </section>
+          ) : null}
         </>
       ) : null}
 
@@ -373,6 +393,11 @@ export function DashboardShell({ user }) {
                 <span>Programmes</span>
                 <strong>Builder & duplication</strong>
                 <em>{dashboard.programs.length} programme(s) disponibles</em>
+              </button>
+              <button className="coach-command-item" onClick={() => openWorkspace("coaches", "coach-create-panel")} type="button">
+                <span>Coachs</span>
+                <strong>Creer un coach</strong>
+                <em>Ajouter un nouvel acces coach</em>
               </button>
             </div>
           </aside>

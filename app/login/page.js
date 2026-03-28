@@ -28,12 +28,6 @@ export default async function LoginPage() {
           Suivi clients, analytics en temps reel, messagerie coach et execution terrain
           sur une seule plateforme Next.js.
         </p>
-        <div className="auth-badges">
-          <span>Next.js</span>
-          <span>PostgreSQL</span>
-          <span>JWT Auth</span>
-          <span>PWA Sync</span>
-        </div>
       </section>
 
       <aside className="auth-card">
