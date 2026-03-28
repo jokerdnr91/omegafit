@@ -208,7 +208,6 @@ export function ClientsSection({
   onSaveClient,
   onSearchChange,
   onSelectClient,
-  onToggleTask,
   search,
   selectedClient,
 }) {
@@ -231,7 +230,6 @@ export function ClientsSection({
       tags: String(formData.get("tags") ?? selectedClient.tags.join(", ")),
       weightKg: Number(formData.get("weightKg") ?? selectedClient.stats.weightKg),
       bodyFat: Number(formData.get("bodyFat") ?? selectedClient.stats.bodyFat),
-      sleepHours: Number(formData.get("sleepHours") ?? selectedClient.stats.sleepHours),
       calories: Number(formData.get("calories") ?? selectedClient.nutrition.calories),
       protein: Number(formData.get("protein") ?? selectedClient.nutrition.protein),
       carbs: Number(formData.get("carbs") ?? selectedClient.nutrition.carbs),
@@ -328,10 +326,9 @@ export function ClientsSection({
                     </span>
                   ))}
                 </div>
-                <div className="mini-grid four">
+                <div className="mini-grid">
                   <div><span>Poids</span><strong>{selectedClient.stats.weightKg} kg</strong></div>
                   <div><span>Body fat</span><strong>{selectedClient.stats.bodyFat}%</strong></div>
-                  <div><span>Sommeil</span><strong>{selectedClient.stats.sleepHours} h</strong></div>
                   <div><span>HRV</span><strong>{selectedClient.stats.hrv}</strong></div>
                 </div>
                 <div className="access-card">
@@ -463,25 +460,6 @@ export function ClientsSection({
                     <h3>Fiche client complete</h3>
                   </div>
                 </div>
-                <div className="task-list">
-                  {selectedClient.tasks.map((task) => (
-                    <label className="task-item" key={task.id}>
-                      <input
-                        checked={task.done}
-                        onChange={(event) => {
-                          const nextTasks = selectedClient.tasks.map((currentTask) =>
-                            currentTask.id === task.id
-                              ? { ...currentTask, done: event.target.checked }
-                              : currentTask,
-                          );
-                          void onToggleTask(selectedClient.id, nextTasks);
-                        }}
-                        type="checkbox"
-                      />
-                      <span>{task.label}</span>
-                    </label>
-                  ))}
-                </div>
                 <form className="stack-form" onSubmit={handleSave}>
                   <div className="inline-grid">
                     <label>
@@ -517,11 +495,7 @@ export function ClientsSection({
                       <input defaultValue={selectedClient.stats.bodyFat} name="bodyFat" step="0.1" type="number" />
                     </label>
                   </div>
-                  <div className="inline-grid three">
-                    <label>
-                      <span>Sommeil</span>
-                      <input defaultValue={selectedClient.stats.sleepHours} name="sleepHours" step="0.1" type="number" />
-                    </label>
+                  <div className="inline-grid">
                     <label>
                       <span>Prochaine seance</span>
                       <input defaultValue={selectedClient.nextSessionAt?.slice(0, 16) ?? ""} name="nextSessionAt" type="datetime-local" />

@@ -223,12 +223,6 @@ export function DashboardShell({ user }) {
         "Sauvegarde de la fiche...",
         "Fiche client sauvegardee",
       ),
-    toggleTask: async (clientId, tasks) =>
-      runMutation(
-        () => fetchJson(`/api/clients/${clientId}`, { method: "PATCH", body: JSON.stringify({ tasks }) }),
-        "Mise a jour de la checklist...",
-        "Checklist mise a jour",
-      ),
   };
 
   return (
@@ -256,7 +250,6 @@ export function DashboardShell({ user }) {
                 onSaveClient={actions.saveClient}
                 onSearchChange={actions.setSearch}
                 onSelectClient={handleSelectClient}
-                onToggleTask={actions.toggleTask}
                 search={search}
                 selectedClient={selectedClient}
               />
@@ -275,7 +268,6 @@ export function DashboardShell({ user }) {
                   onSaveClient={actions.saveClient}
                   onSearchChange={actions.setSearch}
                   onSelectClient={handleSelectClient}
-                  onToggleTask={actions.toggleTask}
                   search={search}
                   selectedClient={selectedClient}
                 />

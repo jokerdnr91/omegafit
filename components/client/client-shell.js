@@ -478,7 +478,7 @@ export function ClientShell({ user }) {
                   >
                     <span>{String(index + 1).padStart(2, "0")}</span>
                     <strong>{exercise.name}</strong>
-                    <em>{completed ? "Termine" : draft?.skipped ? "Justifie" : "A faire"}</em>
+                    <em>{completed ? "Termine" : draft?.skipped ? "Justifie" : "En attente"}</em>
                   </button>
                 );
               })}
@@ -580,14 +580,6 @@ export function ClientShell({ user }) {
               <div><span>Completion</span><strong>{data.weeklyProgress.completion}%</strong></div>
               <div><span>Momentum</span><strong>{data.weeklyProgress.momentum}%</strong></div>
               <div><span>Consistance</span><strong>{data.weeklyProgress.consistency}%</strong></div>
-            </div>
-            <div className="task-list">
-              {client.tasks.map((task) => (
-                <div className="task-item" key={task.id}>
-                  <input checked={task.done} readOnly type="checkbox" />
-                  <span>{task.label}</span>
-                </div>
-              ))}
             </div>
           </article>
 
