@@ -247,10 +247,8 @@ export function DashboardShell({ user }) {
         isPending={isPending}
         onOpenCoachMenu={openCoachMenu}
         onLogout={actions.logout}
-        spotlightClient={dashboard.overview.spotlightClient}
         syncStatus={syncStatus}
         user={user}
-        agenda={dashboard.overview.agenda}
       />
 
       {activeWorkspace ? (

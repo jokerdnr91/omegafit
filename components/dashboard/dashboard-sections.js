@@ -97,10 +97,8 @@ export function HeroSection({
   isPending,
   onOpenCoachMenu,
   onLogout,
-  spotlightClient,
   syncStatus,
   user,
-  agenda,
 }) {
   return (
     <header className="dashboard-hero glass-panel">
@@ -117,12 +115,8 @@ export function HeroSection({
         <h1>Le cockpit premium du coaching sportif.</h1>
         <p className="hero-lead">{coach.tagline}</p>
         <div className="hero-actions">
-          <button
-            className="button button-primary"
-            onClick={() => document.getElementById("clients-panel")?.scrollIntoView({ behavior: "smooth" })}
-            type="button"
-          >
-            Ouvrir le roster
+          <button className="button button-primary" onClick={onOpenCoachMenu} type="button">
+            Ouvrir le menu
           </button>
           <button className="button button-ghost" onClick={onLogout} type="button">
             Deconnexion
@@ -137,7 +131,6 @@ export function HeroSection({
         </div>
         <div className="coach-summary">
           <div>
-            <p className="section-kicker">Coach</p>
             <h2>{coach.name || user.name}</h2>
             <p className="muted-text">{coach.title}</p>
           </div>
@@ -151,35 +144,6 @@ export function HeroSection({
               <strong>{coach.nps}</strong>
             </div>
           </div>
-        </div>
-        {spotlightClient ? (
-          <div className="spotlight-card">
-            <span>Client spotlight</span>
-            <h3>{spotlightClient.name}</h3>
-            <p className="muted-text">{spotlightClient.achievement}</p>
-            <div className="mini-grid">
-              <div>
-                <span>Adherence</span>
-                <strong>{spotlightClient.adherence}%</strong>
-              </div>
-              <div>
-                <span>Recup</span>
-                <strong>{spotlightClient.recovery}%</strong>
-              </div>
-            </div>
-          </div>
-        ) : null}
-        <div className="agenda-list">
-          {agenda.map((item) => (
-            <article className="activity-card" key={item.id}>
-              <div className="card-head">
-                <strong>{item.name}</strong>
-                <span>{formatDate(item.nextSessionAt, { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}</span>
-              </div>
-              <p>{item.goal}</p>
-              <span className={`status-pill status-${statusTone(item.status)}`}>{item.status}</span>
-            </article>
-          ))}
         </div>
       </aside>
     </header>
