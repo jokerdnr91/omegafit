@@ -379,6 +379,8 @@ export async function findUserByEmail(email) {
 }
 
 export async function getDashboardDataForCoach(coachId) {
+  await query("delete from messages where created_at < now() - interval '48 hours'");
+
   const [
     clientsResult,
     programsResult,
@@ -514,6 +516,8 @@ export async function getDashboardDataForCoach(coachId) {
 }
 
 export async function getClientDashboardData(clientId) {
+  await query("delete from messages where created_at < now() - interval '48 hours'");
+
   const clientResult = await query("select * from clients where id = $1 limit 1", [clientId]);
   const clientRow = clientResult.rows[0];
 
@@ -1092,6 +1096,8 @@ export async function createMessageForCoach(coachId, payload) {
       [payload.clientId],
     );
 
+    await db.query("delete from messages where created_at < now() - interval '48 hours'");
+
     await db.query(
       `
         update messages
@@ -1135,6 +1141,8 @@ export async function createMessageForCoach(coachId, payload) {
 export async function createMessageForClient(clientId, userId, payload) {
   return withTransaction(async (db) => {
     const messagePayload = normalizeMessagePayload(payload);
+
+    await db.query("delete from messages where created_at < now() - interval '48 hours'");
 
     const client = await db.query("select id, coach_id, full_name from clients where id = $1 limit 1", [
       clientId,

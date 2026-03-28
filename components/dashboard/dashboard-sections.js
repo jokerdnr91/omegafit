@@ -177,13 +177,8 @@ export function ClientsSection({
       goal: String(formData.get("goal") ?? selectedClient.goal),
       planTier: String(formData.get("planTier") ?? selectedClient.planTier),
       nextSessionAt: String(formData.get("nextSessionAt") ?? selectedClient.nextSessionAt),
-      tags: String(formData.get("tags") ?? selectedClient.tags.join(", ")),
       weightKg: Number(formData.get("weightKg") ?? selectedClient.stats.weightKg),
       bodyFat: Number(formData.get("bodyFat") ?? selectedClient.stats.bodyFat),
-      calories: Number(formData.get("calories") ?? selectedClient.nutrition.calories),
-      protein: Number(formData.get("protein") ?? selectedClient.nutrition.protein),
-      carbs: Number(formData.get("carbs") ?? selectedClient.nutrition.carbs),
-      fats: Number(formData.get("fats") ?? selectedClient.nutrition.fats),
       loginPassword: String(formData.get("loginPassword") ?? ""),
       status: String(formData.get("status") ?? selectedClient.status),
       notes: String(formData.get("notes") ?? selectedClient.notes),
@@ -275,13 +270,6 @@ export function ClientsSection({
                       {getClientActivityState(selectedClient)}
                     </span>
                   </div>
-                </div>
-                <div className="tag-row">
-                  {selectedClient.tags.map((tag) => (
-                    <span className="tag" key={tag}>
-                      {tag}
-                    </span>
-                  ))}
                 </div>
                 <div className="mini-grid">
                   <div><span>Poids</span><strong>{selectedClient.stats.weightKg} kg</strong></div>
@@ -401,12 +389,6 @@ export function ClientsSection({
                   </div>
                   <p className="muted-text">{selectedClient.program?.focus ?? "Assigne un programme depuis la colonne de droite."}</p>
                 </div>
-                <div className="mini-grid four">
-                  <div><span>Calories</span><strong>{selectedClient.nutrition.calories}</strong></div>
-                  <div><span>Proteines</span><strong>{selectedClient.nutrition.protein} g</strong></div>
-                  <div><span>Glucides</span><strong>{selectedClient.nutrition.carbs} g</strong></div>
-                  <div><span>Lipides</span><strong>{selectedClient.nutrition.fats} g</strong></div>
-                </div>
                 <PerformanceBars items={comparison} />
               </section>
 
@@ -470,16 +452,6 @@ export function ClientsSection({
                     <span>Objectif</span>
                     <input defaultValue={selectedClient.goal} name="goal" required />
                   </label>
-                  <label>
-                    <span>Tags</span>
-                    <input defaultValue={selectedClient.tags.join(", ")} name="tags" placeholder="Hyrox, Strength, Nutrition" />
-                  </label>
-                  <div className="inline-grid four">
-                    <label><span>Calories</span><input defaultValue={selectedClient.nutrition.calories} name="calories" type="number" /></label>
-                    <label><span>Proteines</span><input defaultValue={selectedClient.nutrition.protein} name="protein" type="number" /></label>
-                    <label><span>Glucides</span><input defaultValue={selectedClient.nutrition.carbs} name="carbs" type="number" /></label>
-                    <label><span>Lipides</span><input defaultValue={selectedClient.nutrition.fats} name="fats" type="number" /></label>
-                  </div>
                   <label>
                     <span>Nouveau mot de passe eleve</span>
                     <input name="loginPassword" placeholder="Laisser vide pour conserver l'actuel" type="text" />
@@ -690,7 +662,14 @@ export function SidePanels({ activity, clients, onCreateProgram, programs, selec
   );
 }
 
-export function BottomPanels({ latestCredentials, onCreateCheckIn, onCreateClient, onSendMessage, selectedClient }) {
+export function BottomPanels({
+  latestCredentials,
+  onCreateCheckIn,
+  onCreateClient,
+  onSendMessage,
+  selectedClient,
+  showActionsPanel = true,
+}) {
   async function handleCreateClient(event) {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
@@ -729,7 +708,7 @@ export function BottomPanels({ latestCredentials, onCreateCheckIn, onCreateClien
   }
 
   return (
-    <section className="bottom-grid">
+    <section className={`bottom-grid ${showActionsPanel ? "" : "bottom-grid-single"}`}>
       <article className="glass-panel panel">
         <div className="panel-head"><div><p className="section-kicker">Communication</p><h2>Messagerie coach</h2></div></div>
         <div className="message-list">
@@ -748,52 +727,54 @@ export function BottomPanels({ latestCredentials, onCreateCheckIn, onCreateClien
         </form>
       </article>
 
-      <article className="glass-panel panel">
-        <div className="panel-head"><div><p className="section-kicker">Actions rapides</p><h2>Onboarding & check-ins</h2></div></div>
-        <div className="forms-stack">
-          <form className="stack-form" onSubmit={handleCreateClient}>
-            <h3>Nouveau client</h3>
-            <label><span>Nom complet</span><input name="fullName" placeholder="Nom du client" required /></label>
-            <div className="inline-grid">
-              <label><span>Email</span><input name="email" placeholder="client@example.com" type="email" /></label>
-              <label><span>Telephone</span><input name="phone" placeholder="+33 6..." /></label>
-            </div>
-            <div className="inline-grid">
-              <label><span>Ville</span><input name="city" placeholder="Paris" required /></label>
-              <label><span>Age</span><input defaultValue="30" max="80" min="16" name="age" type="number" /></label>
-            </div>
-            <label><span>Objectif</span><input name="goal" placeholder="Transformation, Hyrox, prise de masse..." required /></label>
-            <label><span>Offre</span><select defaultValue="Premium" name="planTier"><option value="Elite">Elite</option><option value="Premium">Premium</option><option value="Essential">Essential</option></select></label>
-            <label><span>Mot de passe eleve</span><input name="loginPassword" placeholder="Laisser vide pour generation auto" /></label>
-            <label><span>Notes</span><textarea name="notes" placeholder="Contexte, niveau, contraintes..." rows={3} /></label>
-            <button className="button button-primary" type="submit">Ajouter le client</button>
-            {latestCredentials ? (
-              <div className="access-card accent">
-                <div>
-                  <span>Dernier acces genere</span>
-                  <strong>{latestCredentials.email}</strong>
-                </div>
-                <p className="muted-text">Mot de passe : <strong>{latestCredentials.password}</strong></p>
+      {showActionsPanel ? (
+        <article className="glass-panel panel">
+          <div className="panel-head"><div><p className="section-kicker">Actions rapides</p><h2>Onboarding & check-ins</h2></div></div>
+          <div className="forms-stack">
+            <form className="stack-form" onSubmit={handleCreateClient}>
+              <h3>Nouveau client</h3>
+              <label><span>Nom complet</span><input name="fullName" placeholder="Nom du client" required /></label>
+              <div className="inline-grid">
+                <label><span>Email</span><input name="email" placeholder="client@example.com" type="email" /></label>
+                <label><span>Telephone</span><input name="phone" placeholder="+33 6..." /></label>
               </div>
-            ) : null}
-          </form>
+              <div className="inline-grid">
+                <label><span>Ville</span><input name="city" placeholder="Paris" required /></label>
+                <label><span>Age</span><input defaultValue="30" max="80" min="16" name="age" type="number" /></label>
+              </div>
+              <label><span>Objectif</span><input name="goal" placeholder="Transformation, Hyrox, prise de masse..." required /></label>
+              <label><span>Offre</span><select defaultValue="Premium" name="planTier"><option value="Elite">Elite</option><option value="Premium">Premium</option><option value="Essential">Essential</option></select></label>
+              <label><span>Mot de passe eleve</span><input name="loginPassword" placeholder="Laisser vide pour generation auto" /></label>
+              <label><span>Notes</span><textarea name="notes" placeholder="Contexte, niveau, contraintes..." rows={3} /></label>
+              <button className="button button-primary" type="submit">Ajouter le client</button>
+              {latestCredentials ? (
+                <div className="access-card accent">
+                  <div>
+                    <span>Dernier acces genere</span>
+                    <strong>{latestCredentials.email}</strong>
+                  </div>
+                  <p className="muted-text">Mot de passe : <strong>{latestCredentials.password}</strong></p>
+                </div>
+              ) : null}
+            </form>
 
-          <form className="stack-form" key={selectedClient?.id ?? "checkin-none"} onSubmit={handleCheckIn}>
-            <h3>Nouveau check-in</h3>
-            <label><span>Completion du plan (%)</span><input defaultValue={selectedClient?.latestCheckIn?.workoutCompletion ?? 90} max="100" min="0" name="workoutCompletion" type="number" /></label>
-            <div className="inline-grid">
-              <label><span>Energie /10</span><input defaultValue={selectedClient?.latestCheckIn?.energy ?? 8} max="10" min="1" name="energy" type="number" /></label>
-              <label><span>Motivation /10</span><input defaultValue={selectedClient?.latestCheckIn?.motivation ?? 8} max="10" min="1" name="motivation" type="number" /></label>
-            </div>
-            <div className="inline-grid">
-              <label><span>Courbatures /10</span><input defaultValue={selectedClient?.latestCheckIn?.soreness ?? 4} max="10" min="1" name="soreness" type="number" /></label>
-              <label><span>Poids (kg)</span><input defaultValue={selectedClient?.stats.weightKg ?? 72} min="35" name="weightKg" step="0.1" type="number" /></label>
-            </div>
-            <label><span>Note coach</span><textarea name="note" placeholder="Ressenti, ajustements, points d'attention..." rows={3} /></label>
-            <button className="button button-primary" disabled={!selectedClient} type="submit">Enregistrer le check-in</button>
-          </form>
-        </div>
-      </article>
+            <form className="stack-form" key={selectedClient?.id ?? "checkin-none"} onSubmit={handleCheckIn}>
+              <h3>Nouveau check-in</h3>
+              <label><span>Completion du plan (%)</span><input defaultValue={selectedClient?.latestCheckIn?.workoutCompletion ?? 90} max="100" min="0" name="workoutCompletion" type="number" /></label>
+              <div className="inline-grid">
+                <label><span>Energie /10</span><input defaultValue={selectedClient?.latestCheckIn?.energy ?? 8} max="10" min="1" name="energy" type="number" /></label>
+                <label><span>Motivation /10</span><input defaultValue={selectedClient?.latestCheckIn?.motivation ?? 8} max="10" min="1" name="motivation" type="number" /></label>
+              </div>
+              <div className="inline-grid">
+                <label><span>Courbatures /10</span><input defaultValue={selectedClient?.latestCheckIn?.soreness ?? 4} max="10" min="1" name="soreness" type="number" /></label>
+                <label><span>Poids (kg)</span><input defaultValue={selectedClient?.stats.weightKg ?? 72} min="35" name="weightKg" step="0.1" type="number" /></label>
+              </div>
+              <label><span>Note coach</span><textarea name="note" placeholder="Ressenti, ajustements, points d'attention..." rows={3} /></label>
+              <button className="button button-primary" disabled={!selectedClient} type="submit">Enregistrer le check-in</button>
+            </form>
+          </div>
+        </article>
+      ) : null}
     </section>
   );
 }

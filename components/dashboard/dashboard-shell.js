@@ -320,6 +320,7 @@ export function DashboardShell({ user }) {
               onSendMessage={actions.sendMessage}
               selectedClient={selectedClient}
               latestCredentials={latestCredentials}
+              showActionsPanel={false}
             />
           ) : null}
 
