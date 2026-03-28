@@ -4,10 +4,20 @@ import { buildAuthCookie, signAuthToken, verifyPassword } from "@/src/lib/auth";
 import { jsonError, mapErrorToStatus, parseJsonBody } from "@/src/lib/http";
 import { findUserByEmail } from "@/src/lib/repository";
 
+function normalizeLoginEmail(value) {
+  const raw = String(value ?? "").trim().toLowerCase();
+
+  if (!raw) {
+    return "";
+  }
+
+  return raw.includes("@") ? raw : `${raw}@omegafit.app`;
+}
+
 export async function POST(request) {
   try {
     const payload = await parseJsonBody(request);
-    const email = String(payload.email ?? "").trim().toLowerCase();
+    const email = normalizeLoginEmail(payload.email);
     const password = String(payload.password ?? "");
 
     if (!email || !password) {

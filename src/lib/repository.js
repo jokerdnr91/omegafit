@@ -335,7 +335,27 @@ function buildEmailPlaceholder(fullName) {
     .replaceAll(/[^a-z0-9]+/g, ".")
     .replaceAll(/^\.+|\.+$/g, "");
 
-  return `${slug || "client"}@omegafit.local`;
+  return `${slug || "client"}@omegafit.app`;
+}
+
+function normalizeOmegaFitEmail(value) {
+  const raw = String(value ?? "").trim().toLowerCase();
+
+  if (!raw) {
+    return "";
+  }
+
+  if (!raw.includes("@")) {
+    return `${raw}@omegafit.app`;
+  }
+
+  const [localPart, domain] = raw.split("@");
+
+  if (!localPart || domain !== "omegafit.app") {
+    throw new Error("L'identifiant doit utiliser le domaine @omegafit.app.");
+  }
+
+  return `${localPart}@omegafit.app`;
 }
 
 function buildGeneratedPassword(label = "OmegaFit") {
@@ -649,7 +669,8 @@ export async function createClientForCoach(coachId, payload) {
 
     const clientId = randomUUID();
     const weightKg = Number(payload.weightKg ?? 78);
-    const email = String(payload.email ?? "").trim() || buildEmailPlaceholder(payload.fullName);
+    const emailInput = String(payload.email ?? "").trim();
+    const email = emailInput ? normalizeOmegaFitEmail(emailInput) : buildEmailPlaceholder(payload.fullName);
     const phone = String(payload.phone ?? "").trim() || "Non renseigne";
     const loginPassword = String(payload.loginPassword ?? "").trim() || buildGeneratedPassword("Client");
     const nextSessionAt = payload.nextSessionAt
@@ -763,7 +784,7 @@ export async function updateClientForCoach(coachId, clientId, patch) {
     const nextNotes = typeof patch.notes === "string" ? patch.notes.trim() : client.notes;
     const nextFullName = typeof patch.fullName === "string" ? patch.fullName.trim() : client.full_name;
     const nextEmail =
-      typeof patch.email === "string" && patch.email.trim() ? patch.email.trim().toLowerCase() : client.email;
+      typeof patch.email === "string" && patch.email.trim() ? normalizeOmegaFitEmail(patch.email) : client.email;
     const nextPhone = typeof patch.phone === "string" ? patch.phone.trim() : client.phone;
     const nextCity = typeof patch.city === "string" ? patch.city.trim() : client.city;
     const nextGoal = typeof patch.goal === "string" ? patch.goal.trim() : client.goal;
@@ -902,7 +923,7 @@ export async function deleteClientForCoach(coachId, clientId) {
 export async function createCoachAccount(payload) {
   return withTransaction(async (db) => {
     const name = String(payload.name ?? "").trim();
-    const email = String(payload.email ?? "").trim().toLowerCase();
+    const email = normalizeOmegaFitEmail(payload.email);
     const password = String(payload.password ?? "").trim();
 
     if (!name || !email || !password) {

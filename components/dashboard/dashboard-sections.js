@@ -407,8 +407,14 @@ export function ClientsSection({
                       <input defaultValue={selectedClient.fullName} name="fullName" required />
                     </label>
                     <label>
-                      <span>Email de connexion</span>
-                      <input defaultValue={selectedClient.email} name="email" type="email" required />
+                      <span>Identifiant eleve</span>
+                      <input
+                        defaultValue={selectedClient.email.replace(/@omegafit\.app$/i, "")}
+                        name="email"
+                        required
+                        type="text"
+                      />
+                      <small className="muted-text">@omegafit.app sera ajoute automatiquement</small>
                     </label>
                   </div>
                   <div className="inline-grid">
@@ -747,7 +753,11 @@ export function BottomPanels({
                 <h3>Nouveau client</h3>
                 <label><span>Nom complet</span><input name="fullName" placeholder="Nom du client" required /></label>
                 <div className="inline-grid">
-                  <label><span>Email</span><input name="email" placeholder="client@example.com" type="email" /></label>
+                <label>
+                  <span>Identifiant eleve</span>
+                  <input name="email" placeholder="nom.prenom" type="text" />
+                  <small className="muted-text">@omegafit.app sera ajoute automatiquement</small>
+                </label>
                   <label><span>Telephone</span><input name="phone" placeholder="+33 6..." /></label>
                 </div>
                 <div className="inline-grid">
@@ -829,8 +839,9 @@ export function CoachAccessPanel({ onCreateCoach }) {
           <input name="name" placeholder="Nom, prenom" required />
         </label>
         <label>
-          <span>Email</span>
-          <input name="email" placeholder="Saisir une adresse email" type="email" required />
+          <span>Identifiant coach</span>
+          <input name="email" placeholder="nom.prenom" type="text" required />
+          <small className="muted-text">@omegafit.app sera ajoute automatiquement</small>
         </label>
         <label>
           <span>Mot de passe</span>
